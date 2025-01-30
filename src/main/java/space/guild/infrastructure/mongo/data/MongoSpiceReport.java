@@ -1,4 +1,4 @@
-package com.example.infrastructure.mongo.data;
+package space.guild.infrastructure.mongo.data;
 
 import io.micronaut.data.annotation.GeneratedValue;
 import io.micronaut.data.annotation.Id;

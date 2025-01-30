@@ -1,4 +1,4 @@
-package com.example;
+package space.guild;
 
 import io.micronaut.runtime.Micronaut;
 

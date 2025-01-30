@@ -1,4 +1,4 @@
-package com.example.infrastructure.mongo.data;
+package space.guild.infrastructure.mongo.data;
 
 import io.micronaut.data.mongodb.annotation.MongoRepository;
 import io.micronaut.data.repository.CrudRepository;

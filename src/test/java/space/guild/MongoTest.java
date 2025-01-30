@@ -1,8 +1,11 @@
-package com.example;
+package space.guild;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoClient;
+import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.micronaut.test.support.TestPropertyProvider;
@@ -14,9 +17,12 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -46,11 +52,17 @@ public abstract class MongoTest implements TestPropertyProvider {
         }
     }
 
-    private void pushDataToCollection(FileForCollection fileForCollection, MongoSetup mongoSetup) {
+    private <T> void pushDataToCollection(FileForCollection<T> fileForCollection, MongoSetup mongoSetup) {
         try {
             var content = Files.readAllBytes(fileForCollection.pathToFile());
-            var stringsFromContent = objectMapper.readValue(content, new TypeReference<List<String>>() {});
-            var documents = stringsFromContent.stream().map(Document::parse).toList();
+            var contentElements = (T[])objectMapper.readValue(content, fileForCollection.mongoDocumentListClass.arrayType());
+            var documents = Arrays.stream(contentElements).map(ce-> {
+                try {
+                    return Document.parse(objectMapper.writeValueAsString(ce));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }).toList();
             mongoClient.getDatabase(mongoSetup.databaseName())
                     .getCollection(fileForCollection.collectionName())
                     .insertMany(documents);
@@ -78,12 +90,12 @@ public abstract class MongoTest implements TestPropertyProvider {
     @Override
     public @NonNull Map<String, String> getProperties() {
         mongoDBContainer.start();
-        return Map.of("mongodb.uri", mongoDBContainer.getConnectionString());
+        return Map.of("mongodb.uri", mongoDBContainer.getConnectionString()+"/SPACEGUILD");
     }
 
     public record MongoSetup(String databaseName, List<String> collectionNameList) {
     }
 
-    public record FileForCollection(String collectionName, Path pathToFile) {
+    public record FileForCollection<T>(String collectionName, Class<T> mongoDocumentListClass, Path pathToFile) {
     }
 }

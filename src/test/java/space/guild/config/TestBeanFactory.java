@@ -1,4 +1,4 @@
-package com.example.config;
+package space.guild.config;
 
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
