@@ -83,7 +83,7 @@ public abstract class MongoTest implements TestPropertyProvider {
 
     public abstract MongoSetup mongoSetup();
 
-    public List<FileForCollection> dataForInit() {
+    public List<FileForCollection<?>> dataForInit() {
         return new ArrayList<>();
     }
 

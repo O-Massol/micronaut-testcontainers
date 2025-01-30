@@ -1,11 +1,9 @@
 package space.guild;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import org.jetbrains.annotations.NotNull;
-import space.guild.infrastructure.mongo.data.MongoSpiceReport;
-import space.guild.infrastructure.mongo.data.SpiceReportRepository;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
+import space.guild.infrastructure.mongo.data.MongoSpiceReport;
+import space.guild.infrastructure.mongo.data.SpiceReportRepository;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -21,12 +19,12 @@ public class SpiceReportRepositoryTest extends MongoTest {
     private SpiceReportRepository spiceReportRepository;
 
     @Override
-    public List<FileForCollection> dataForInit() {
+    public List<FileForCollection<?>> dataForInit() {
         try {
             URI spiceReportDataFileUri = null;
             spiceReportDataFileUri = this.getClass().getClassLoader().getResource("datasets/spiceReports.json").toURI();
             return List.of(
-                    new FileForCollection("spice-report-10190",
+                    new FileForCollection<>("spice-report-10190",
                             MongoSpiceReport.class,
                             Path.of(spiceReportDataFileUri))
             );
