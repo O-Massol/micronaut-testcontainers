@@ -53,6 +53,10 @@
       <artifactId>micronaut-data-document-processor</artifactId>
       <scope>runtime</scope>
     </dependency>
+    <dependency>
+      <groupId>io.micronaut.kafka</groupId>
+      <artifactId>micronaut-kafka</artifactId>
+    </dependency>
 
 
     <dependency>

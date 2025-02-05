@@ -1,24 +1,21 @@
-package space.guild;
+package space.guild.testing;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoClient;
-import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.micronaut.test.support.TestPropertyProvider;
-import org.bson.Document;
-import org.junit.jupiter.api.*;
-
 import jakarta.inject.Inject;
+import org.bson.Document;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
 import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -26,13 +23,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-@MicronautTest(environments = "test")
+@MicronautTest(environments = "test", transactional = false)
 @Testcontainers
 //test instance required for TestPropertyProvider
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public abstract class MongoTest implements TestPropertyProvider {
+public abstract class KafkaMongoTest implements TestPropertyProvider {
 
     static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:7.0");
+
+    static final KafkaContainer kafkaContainer = new KafkaContainer("apache/kafka-native:3.8.0");
+
     static final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeAll
@@ -73,8 +73,11 @@ public abstract class MongoTest implements TestPropertyProvider {
 
     @AfterAll
     void teardown() {
-        if (mongoDBContainer != null && mongoDBContainer.isRunning()) {
+        if (mongoDBContainer.isRunning()) {
             mongoDBContainer.stop();
+        }
+        if (kafkaContainer.isRunning()) {
+            kafkaContainer.stop();
         }
     }
 
@@ -90,7 +93,11 @@ public abstract class MongoTest implements TestPropertyProvider {
     @Override
     public @NonNull Map<String, String> getProperties() {
         mongoDBContainer.start();
-        return Map.of("mongodb.uri", mongoDBContainer.getConnectionString()+"/SPACEGUILD");
+        kafkaContainer.start();
+        return Map.of(
+                "mongodb.uri", mongoDBContainer.getConnectionString()+"/SPACEGUILD",
+                "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers()
+        );
     }
 
     public record MongoSetup(String databaseName, List<String> collectionNameList) {

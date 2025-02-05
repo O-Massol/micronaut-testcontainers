@@ -1,9 +1,9 @@
-package space.guild;
+package space.guild.infrastructure.mongo;
 
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
+import space.guild.testing.KafkaMongoTest;
 import space.guild.infrastructure.mongo.data.MongoSpiceReport;
-import space.guild.infrastructure.mongo.data.SpiceReportRepository;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -13,7 +13,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SpiceReportRepositoryTest extends MongoTest {
+public class SpiceReportRepositoryTest extends KafkaMongoTest {
 
     @Inject
     private SpiceReportRepository spiceReportRepository;
